@@ -7,12 +7,14 @@
 // Execute `rustlings hint from_into` or use the `hint` watch subcommand for a
 // hint.
 
+
+ 
 #[derive(Debug)]
 struct Person {
     name: String,
     age: usize,
 }
-
+ 
 // We implement the Default trait to use it as a fallback
 // when the provided string is not convertible into a Person object
 impl Default for Person {
@@ -23,7 +25,7 @@ impl Default for Person {
         }
     }
 }
-
+ 
 // Your task is to complete this implementation in order for the line `let p =
 // Person::from("Mark,20")` to compile Please note that you'll need to parse the
 // age component into a `usize` with something like `"4".parse::<usize>()`. The
@@ -39,14 +41,23 @@ impl Default for Person {
 //    `usize` as the age.
 // If while parsing the age, something goes wrong, then return the default of
 // Person Otherwise, then return an instantiated Person object with the results
-
-// I AM NOT DONE
-
+ 
+ 
 impl From<&str> for Person {
     fn from(s: &str) -> Person {
+        let mut iter=s.trim().split(',');
+        let name=iter.next().unwrap_or_default();
+        let age = iter.next().and_then(|x| x.parse::<usize>().ok()).unwrap_or_default();
+ 
+        match (name,age,iter.next().is_some()) {
+            ("",_,_) =>Person::default(),
+            (_,0,_) => Person::default(),
+            (_,_,true) =>Person::default(),
+            (name,age,_) =>Person{name:name.to_string(),age},
+        }
     }
 }
-
+ 
 fn main() {
     // Use the `from` function
     let p1 = Person::from("Mark,20");
@@ -55,7 +66,7 @@ fn main() {
     println!("{:?}", p1);
     println!("{:?}", p2);
 }
-
+ 
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -88,49 +99,49 @@ mod tests {
         assert_eq!(p.name, "John");
         assert_eq!(p.age, 30);
     }
-
+ 
     #[test]
     fn test_missing_comma_and_age() {
         let p: Person = Person::from("Mark");
         assert_eq!(p.name, "John");
         assert_eq!(p.age, 30);
     }
-
+ 
     #[test]
     fn test_missing_age() {
         let p: Person = Person::from("Mark,");
         assert_eq!(p.name, "John");
         assert_eq!(p.age, 30);
     }
-
+ 
     #[test]
     fn test_missing_name() {
         let p: Person = Person::from(",1");
         assert_eq!(p.name, "John");
         assert_eq!(p.age, 30);
     }
-
+ 
     #[test]
     fn test_missing_name_and_age() {
         let p: Person = Person::from(",");
         assert_eq!(p.name, "John");
         assert_eq!(p.age, 30);
     }
-
+ 
     #[test]
     fn test_missing_name_and_invalid_age() {
         let p: Person = Person::from(",one");
         assert_eq!(p.name, "John");
         assert_eq!(p.age, 30);
     }
-
+ 
     #[test]
     fn test_trailing_comma() {
         let p: Person = Person::from("Mike,32,");
         assert_eq!(p.name, "John");
         assert_eq!(p.age, 30);
     }
-
+ 
     #[test]
     fn test_trailing_comma_and_some_string() {
         let p: Person = Person::from("Mike,32,man");
